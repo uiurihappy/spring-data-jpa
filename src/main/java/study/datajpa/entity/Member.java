@@ -1,14 +1,16 @@
 package study.datajpa.entity;
 
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter @Setter
+// 인자없는 생성자 롬복 활용, 접근 제어자 제어도 가능
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+// 가급적 연관관계 필드는 ToString 하지 않는 게 좋다.
+@ToString(of = {"id", "username", "age"})
 public class Member {
 
 	@Id
@@ -17,15 +19,27 @@ public class Member {
 	private Long id;
 
 	private String username;
+	private int age;
 
-	protected Member() {
-	}
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "team_id")
+	private Team team;
 
 	public Member(String username) {
 		this.username = username;
 	}
 
-//	public void changeUsername(String username){
-//		this.username = username;
-//	}
+	public Member(String username, int age, Team team) {
+		this.username = username;
+		this.age = age;
+		if (team != null) {
+			changeTeam(team);
+		}
+	}
+
+	public void changeTeam(Team team){
+		this.team = team;
+		// 객체이기에 멤버도 변경
+		team.getMembers().add(this);
+	}
 }
