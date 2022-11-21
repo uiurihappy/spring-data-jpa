@@ -37,6 +37,11 @@ public class Member {
 		}
 	}
 
+	public Member(String username, int age) {
+		this.username = username;
+		this.age = age;
+	}
+
 	public void changeTeam(Team team){
 		this.team = team;
 		// 객체이기에 멤버도 변경

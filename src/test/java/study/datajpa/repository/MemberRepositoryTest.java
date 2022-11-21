@@ -69,4 +69,21 @@ class MemberRepositoryTest {
 
 	}
 
+	@Test
+	public void findByUsernameAndAgeGreaterThen() {
+		Member m1 = new Member("AAA", 10);
+		Member m2 = new Member("AAA", 20);
+
+		memberRepository.save(m1);
+		memberRepository.save(m2);
+
+		// 메서드 이름만으로도 data JPA가 잡아준다.
+		List<Member> result = memberRepository.findByUsernameAndAgeGreaterThan("AAA", 15);
+
+		assertEquals(result.get(0).getUsername(),"AAA");
+		assertEquals(result.get(0).getAge(),20);
+		assertEquals(result.size(), 1);
+	}
+
+
 }
