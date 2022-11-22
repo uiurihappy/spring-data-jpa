@@ -69,6 +69,9 @@ class MemberJpaRepositoryTest {
 
 	}
 
+	// namedQuery의 장점
+	// 바로 아래 메서드는 문자를 오타내고 테스트하면 실행에 문자없지만 고객이 API를 실행하면 syntax 오류가 난다.
+	// 하지만 namedQuery는 JSON 파싱되는 과정부터 에러를 내서 버그를 잡을 수 있다.
 	@Test
 	public void findByUsernameAndAgeGreaterThen() {
 		Member m1 = new Member("AAA", 10);
@@ -82,5 +85,18 @@ class MemberJpaRepositoryTest {
 		assertEquals(result.get(0).getUsername(),"AAA");
 		assertEquals(result.get(0).getAge(),20);
 		assertEquals(result.size(), 1);
+	}
+
+	@Test
+	public void namedQueryFindByUsername(){
+		Member m1 = new Member("AAA", 10);
+		Member m2 = new Member("BBB", 20);
+
+		memberJpaRepository.save(m1);
+		memberJpaRepository.save(m2);
+
+		List<Member> result = memberJpaRepository.findByUsername("AAA");
+		Member findMember = result.get(0);
+		assertEquals(findMember, m1);
 	}
 }
