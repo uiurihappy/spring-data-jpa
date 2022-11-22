@@ -9,7 +9,9 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -154,4 +156,45 @@ class MemberRepositoryTest {
 
 	}
 
+
+	@Test
+	public void findByNames() {
+		Member m1 = new Member("AAA", 10);
+		Member m2 = new Member("BBB", 20);
+
+		memberRepository.save(m1);
+		memberRepository.save(m2);
+
+		List<Member> result = memberRepository.findByNames(Arrays.asList("AAA", "BBB"));
+
+		for (Member member  : result) {
+			System.out.println("member = " + member);
+		}
+	}
+
+	@Test
+	public void returnType(){
+		Member m1 = new Member("AAA", 10);
+		Member m2 = new Member("BBB", 20);
+
+		memberRepository.save(m1);
+		memberRepository.save(m2);
+
+		List<Member> aaa = memberRepository.findListByUsername("AAA");
+
+		// 단건 조회같은 경우 match가 안되면 결과가 null
+		// 순수 JPA에서는 NoResultException이 터지는데 Spring Data JPA에서는 Exception이 내장되어 있어서 알아서 null로 잡아준다.
+		Member findMember = memberRepository.findMemberByUsername("AAA");
+		System.out.println("findMember = " + findMember);
+
+		// Java 8 이후부터 Optional이 가능하면서 처리 주도권을 프론트엔드에 넘긴다.
+		// 허나 아래와 같이 단건 조회같은 경우 Exception이 터진다.
+		Optional<Member> optionalMember = memberRepository.findOptionalByUsername("AAA");
+		System.out.println("optionalMember = " + optionalMember);
+
+		// 이름이 없으면 빈 컬렉션을 반환하면서 size가 0이 된다.
+		List<Member> result = memberRepository.findListByUsername("asdasfsqa");
+		System.out.println("result = " + result.size());
+
+	}
 }
