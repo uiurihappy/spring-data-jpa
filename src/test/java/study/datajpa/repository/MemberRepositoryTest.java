@@ -266,7 +266,7 @@ class MemberRepositoryTest {
 	@Test
 	public void bulkUpdate() {
 		// given
-		memberRepository.save(new Member("ㄹmember1", 10));
+		memberRepository.save(new Member("member1", 10));
 		memberRepository.save(new Member("member2", 19));
 		memberRepository.save(new Member("member3", 20));
 		memberRepository.save(new Member("member4", 21));
