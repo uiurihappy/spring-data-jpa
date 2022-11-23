@@ -3,6 +3,10 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -196,5 +200,62 @@ class MemberRepositoryTest {
 		List<Member> result = memberRepository.findListByUsername("asdasfsqa");
 		System.out.println("result = " + result.size());
 
+	}
+
+	@Test
+	public void paging() {
+		// given
+		memberRepository.save(new Member("member1", 10));
+		memberRepository.save(new Member("member2", 10));
+		memberRepository.save(new Member("member3", 10));
+		memberRepository.save(new Member("member4", 10));
+		memberRepository.save(new Member("member5", 10));
+		memberRepository.save(new Member("member6", 10));
+
+		int age = 10;
+
+		// page index는 0부터,
+		// 페이징된 쿼리
+		PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+		// when
+		/**
+		 * 실무 꿀팁
+		 * 현재 Member 엔티티를 그대로 사용하고 있다.
+		 * 여기서 이전 강의에 들었던 엔티티를 그대로 사용하면 엔티티가 노출되기 때문에 DTO를 활용하여 사용한다.
+		 * 근데 여기서 DTO로 쉽게 변환시키는 방법이 있다. (231 line)
+		 */
+		// Page
+		Page<Member> nativePage = memberRepository.findByAge(age, pageRequest);
+		// 내부 Entity가 아닌 API로 반환되어 사용할 수 있는 MemberDto 타입으로 변환했다.
+		Page<MemberDto> page = nativePage.map(m -> new MemberDto(m.getId(), m.getUsername(), null));
+
+		// Slice는 표준 페이징된 사이즈보다 1개 더 들고 온다. (다음 페이지 여부 확인)
+//		Slice<Member> page = memberRepository.findByAge(age, pageRequest);
+		// 반환 타입을 Page로 받으면, 알아서 totalCount 쿼리도 같이 날린다.
+		System.out.println("page = " + page);
+
+		// then
+		List<MemberDto> content = page.getContent();
+		// (slice에는 없는 기능)
+		long totalElements = page.getTotalElements();   // totalCount
+
+		for (MemberDto member : content) {
+			System.out.println("member = " + member);
+		}
+		System.out.println("totalCount = " + totalElements);
+
+		// content는 3개씩 size를 쪼갰으니 3이 맞다
+		assertEquals(content.size(), 3);
+		// 총 member 수 (slice에는 없는 기능)
+		assertEquals(page.getTotalElements(), 6);
+		// page 번호를 가져올 수 있다.
+		assertEquals(page.getNumber(), 0);
+		// 전체 페이지 수 (slice에는 없는 기능)
+		assertEquals(page.getTotalPages(), 2);
+		// 첫 번째 페이지인지
+		assertTrue(page.isFirst());
+		// 다음 페이지가 존재하는 지
+		assertTrue(page.hasNext());
 	}
 }

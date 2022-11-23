@@ -1,5 +1,8 @@
 package study.datajpa.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,6 +41,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	Member findMemberByUsername(String username);       // 단건
 	Optional<Member> findOptionalByUsername(String username);    // 단건 Optional
 
-
+	// count 쿼리 분리
+	@Query(value = "select m from Member m left join m.team t",
+			// countQuery를 분리해야 하는 이유는 Page 타입일 때 연관된 테이블까지 join해서 count 쿼리를 날릴려하니 성능적으로 좋지 않다.
+			// 따로 분리해서 count 쿼리를 작성하면 join 없이 해결할 수 있다.
+			countQuery = "select count(m) from Member m")
+	Page<Member> findByAge(int age, Pageable pageable);
 
 }
