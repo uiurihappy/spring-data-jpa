@@ -13,6 +13,8 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +28,8 @@ class MemberRepositoryTest {
 
 	@Autowired MemberRepository memberRepository;
 	@Autowired TeamRepository teamRepository;
+	@PersistenceContext
+	EntityManager em;
 
 	@Test
 	public void testMember() {
@@ -257,5 +261,32 @@ class MemberRepositoryTest {
 		assertTrue(page.isFirst());
 		// 다음 페이지가 존재하는 지
 		assertTrue(page.hasNext());
+	}
+
+	@Test
+	public void bulkUpdate() {
+		// given
+		memberRepository.save(new Member("ㄹmember1", 10));
+		memberRepository.save(new Member("member2", 19));
+		memberRepository.save(new Member("member3", 20));
+		memberRepository.save(new Member("member4", 21));
+		memberRepository.save(new Member("member5", 40));
+
+		// when
+		int resultCount = memberRepository.bulkAgePlus(20);
+		// bulk성 쿼리는 영속성 데이터를 꼭 날려야 한다.
+		// 남아있는 변경사항을 영속성 컨텍스트에 반영
+//		em.flush();
+		// 영속성 컨텍스트에 있는 데이터를 다 날린다.
+//		em.clear();
+
+		List<Member> result = memberRepository.findByUsername("member5");
+		Member member5 = result.get(0);
+		// member5 = Member(id=5, username=member5, age=40)
+		// bulk 연산에서 영속성 컨텍스트를 무시하고 그냥 DB에 쿼리를 쏜다.
+		System.out.println("member5 = " + member5);
+
+		assertEquals(resultCount, 3);
+
 	}
 }
