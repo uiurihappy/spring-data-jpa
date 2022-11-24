@@ -287,7 +287,7 @@ class MemberRepositoryTest {
 		System.out.println("member5 = " + member5);
 
 		assertEquals(resultCount, 3);
-
+		// git test
 	}
 
 	@Test
