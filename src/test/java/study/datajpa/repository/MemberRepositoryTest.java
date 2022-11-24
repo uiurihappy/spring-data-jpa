@@ -46,7 +46,7 @@ class MemberRepositoryTest {
 	}
 
 
-	// Spring data jpa도 순수 jpa repository랑 똑같이 복붙했지만 테스트가 성공한다.
+	// Spring data JPA도 순수 JPA repository랑 똑같이 복붙했지만 테스트가 성공한다.
 	@Test
 	public void basicCRUD() {
 		Member member1 = new Member("member1");
@@ -287,6 +287,85 @@ class MemberRepositoryTest {
 		System.out.println("member5 = " + member5);
 
 		assertEquals(resultCount, 3);
+
+	}
+
+	@Test
+	public void findMemberLazy() {
+		// given
+		// 멤버 객체가 각 팀들을 참조
+		// member1 -> teamA
+		// member2 -> teamB
+
+		Team teamA = new Team("teamA");
+		Team teamB = new Team("teamB");
+		teamRepository.save(teamA);
+		teamRepository.save(teamB);
+
+		Member member1 = new Member("member1", 10, teamA);
+		Member member2 = new Member("member2", 20, teamB);
+
+		memberRepository.save(member1);
+		memberRepository.save(member2);
+
+		// 완전히 영속성 컨텍스트에 있는 1차 캐시 정보들을 db에 반영한다.
+		// clear로 영속성 컨텍스트를 완전히 날린다.
+		em.flush();
+		em.clear();
+
+		// when
+		// select Member만 가져온다.
+//		List<Member> members = memberRepository.findAll();
+		List<Member> members = memberRepository.findMemberFetchJoin();
+
+		for (Member member : members) {
+			System.out.println("Member = " + member.getUsername());
+			// findAll은 Proxy 객체
+			// fetch join으로는 순수 entity Team 객체 생성
+			System.out.println("Member.teamClass = " + member.getTeam().getClass());
+			/**
+			 * fetch join re-description
+			 * 그러나 Team과 연관관계 매핑이 되어있어서 Team의 Name을 가져오다보니
+			 * 지연로딩 과정에서 Member 쿼리내에 가짜 객체, 즉 Proxy 객체를 들고 와서
+			 * 테스트 결과를 보면 join 안된 단쿼리로 team의 name 값을 들고 온다.
+			 * 결국 1+N 현상이다. (1은 Member, N은 Member와 매핑되어 조회할 테이블 수다.
+			 */
+			System.out.println("Team = " + member.getTeam().getName());
+		}
+
+
+	}
+
+	@Test
+	public void findMemberLazyByEntityGraph() {
+		// given
+		// 멤버 객체가 각 팀들을 참조
+		// member1 -> teamA
+		// member2 -> teamB
+
+		Team teamA = new Team("teamA");
+		Team teamB = new Team("teamB");
+		teamRepository.save(teamA);
+		teamRepository.save(teamB);
+
+		Member member1 = new Member("member1", 10, teamA);
+		Member member2 = new Member("member1", 20, teamB);
+
+		memberRepository.save(member1);
+		memberRepository.save(member2);
+
+		em.flush();
+		em.clear();
+
+		// when
+		// select Member만 가져온다.
+		List<Member> members = memberRepository.findEntityGraphByUsername("member1");
+
+		for (Member member : members) {
+			System.out.println("Member = " + member.getUsername());
+			System.out.println("Team = " + member.getTeam().getName());
+		}
+
 
 	}
 }

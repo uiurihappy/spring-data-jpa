@@ -3,10 +3,12 @@ package study.datajpa.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 
@@ -53,4 +55,23 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	@Modifying(clearAutomatically = true)  // Modifying이 있어야 executeUpdate가 실행된다.
 	@Query("update Member m set m.age = m.age + 1 where m.age >= :age")
 	int bulkAgePlus(@Param("age") int age);
+
+	// fetch join으로 인해 쿼리 한번으로 1+N 문제를 해결
+	@Query("select m from Member m left join fetch m.team")
+	List<Member> findMemberFetchJoin();
+
+	@Override
+	// 내부적으로 fetch join 사용
+	@EntityGraph(attributePaths = {"team"})
+	List<Member> findAll();
+
+	// fetch join: JPQL + EntityGraph
+	@EntityGraph(attributePaths = {"team"})
+	@Query("select m from Member m")
+	List<Member> findByEntityGraph();
+
+	// @NamedEntityGraph 사용으로
+//	@EntityGraph(attributePaths = ("team")) // 대신
+	@EntityGraph("Member.all") // 사용
+	List<Member> findEntityGraphByUsername(@Param("username") String username);
 }
