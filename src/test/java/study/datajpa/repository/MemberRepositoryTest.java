@@ -365,7 +365,42 @@ class MemberRepositoryTest {
 			System.out.println("Member = " + member.getUsername());
 			System.out.println("Team = " + member.getTeam().getName());
 		}
-
-
 	}
+
+	@Test
+	public void queryHint() {
+
+		// given
+		Member member1 = memberRepository.save(new Member("member1", 10));
+		// 실제 엔티티 쿼리를 날리고
+		em.flush();
+		// 영속성 컨텍스트를 날린다.
+		em.clear();
+
+		// when
+		Member findMember = memberRepository.findReadOnlyByUsername("member1");
+	    // QueryHint로 인해 readOnly를 true로 하여 영속성 컨텍스트내에 스냅샷을 추가하지 않아 변경감지를 체크하지 않는다.
+		findMember.setUsername("member2");	// findById시에 변경감지 발생
+
+		em.flush();
+	}
+
+	// select for update
+
+	@Test
+	public void lock() {
+
+		// given
+		Member member1 = memberRepository.save(new Member("member1", 10));
+		// 실제 엔티티 쿼리를 날리고
+		em.flush();
+		// 영속성 컨텍스트를 날린다.
+		em.clear();
+
+		// when
+		List<Member> result = memberRepository.findLockByUsername("member1");
+
+		em.flush();
+	}
+
 }
