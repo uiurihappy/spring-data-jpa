@@ -11,7 +11,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"id", "name"})
-public class Team extends JpaBaseEntity{
+public class Team extends BaseEntity{
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "team_id")
