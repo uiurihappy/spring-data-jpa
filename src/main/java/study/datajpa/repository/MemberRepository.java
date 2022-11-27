@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 

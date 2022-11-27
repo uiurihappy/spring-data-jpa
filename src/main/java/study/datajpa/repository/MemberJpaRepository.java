@@ -1,6 +1,5 @@
 package study.datajpa.repository;
 
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 import study.datajpa.entity.Member;
 
