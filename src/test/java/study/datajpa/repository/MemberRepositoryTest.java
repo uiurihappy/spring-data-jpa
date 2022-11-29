@@ -3,10 +3,7 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -430,6 +427,42 @@ class MemberRepositoryTest {
 		assertEquals(specs.size(), 1);
 		// then
 
+
+	}
+
+	@Test
+	public void queryByExample() {
+		// given
+		Team teamA = new Team("teamA");
+		em.persist(teamA);
+
+		Member m1 = new Member("m1", 0, teamA);
+		Member m2 = new Member("m2", 0, teamA);
+		em.persist(m1);
+		em.persist(m2);
+
+		em.flush();
+		em.clear();
+
+		// when
+		// 동적 쿼리가 아닌 정적 쿼리
+		// member 엔티티 자체가 검색 조건이 된다.
+		Member member = new Member("m1");
+		Team team = new Team("teamA");
+		member.setTeam(team);
+
+		// 이렇게 team join 연관 관계를 지어서 검색 조건을 알아서 던져준다.
+		// 한계는 inner join까지만 가능하다는 것
+
+		// age 라는 속성이 있으면 where 조건에 무시
+		ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("age");
+
+		// m1이라는 애를 도메인 객체로 바로 찾는다.
+		Example<Member> example = Example.of(member, matcher);
+		// JpaRepository는 QueryByExample을 상속받아 example 객체도 사용 가능하다.
+		List<Member> result = memberRepository.findAll(example);
+
+		assertEquals(result.get(0).getUsername(), "m1");
 
 	}
 
