@@ -466,4 +466,50 @@ class MemberRepositoryTest {
 
 	}
 
+	@Test
+	public void projections() {
+		// given
+		Team teamA = new Team("teamA");
+		em.persist(teamA);
+
+		Member m1 = new Member("m1", 0, teamA);
+		Member m2 = new Member("m2", 0, teamA);
+		em.persist(m1);
+		em.persist(m2);
+
+		em.flush();
+		em.clear();
+
+		// when
+		// Interface 기반
+//		List<UsernameOnly> members = memberRepository.findProjectionsByUsernameAndAge("m1", 0);
+//
+//		for (UsernameOnly member : members) {
+//			System.out.println("member.usernameOnly = " + member.getUsernameAndAge());
+//		}
+
+		// Class 기반
+		// Proxy나 그런 것이 필요없다. 구체적인 클래스의 생성자와 getter를 명시했기에
+//		List<UsernameOnlyDto> members = memberRepository.findProjectionsByUsername("m1", UsernameOnlyDto.class);
+//
+//		for (UsernameOnlyDto member : members) {
+//			System.out.println("member.usernameOnly = " + member.getUsername());
+//		}
+		// 중첩 구조
+		List<NestedClosedProjections> members = memberRepository.findProjectionsByUsername("m1", NestedClosedProjections.class);
+
+		// Projection 대상이 root가 아닌 경우
+		// left outer join 처리
+		// 모든 필드를 select를 해서 엔티티로 조회한 다음에 계산
+		for (NestedClosedProjections member : members) {
+			String username = member.getUsername();
+			System.out.println("username = " + username);
+			String teamName = member.getTeam().getName();
+			System.out.println("teamName = " + teamName);
+//			System.out.println("member.usernameOnly = " + member.getUsername());
+		}
+
+
+	}
+
 }
