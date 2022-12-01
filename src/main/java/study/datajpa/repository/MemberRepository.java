@@ -85,5 +85,14 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 	// 동적 프로젝션으로 제네릭 타입을 추가할 수도 있다.
 	<T> List<T> findProjectionsByUsername(@Param("username") String username, Class<T> type);
 
+	@Query(value = "select * from member where username = ?", nativeQuery = true)
+	Member findByNativeQuery(String username);
+
+	// Native 쿼리이기에 countQuery는 꼭 짜야 한다.
+	@Query(value = "select m.member_id as id, m.username, t.name as teamName " +
+			"from member as m left join team as t on t.team_id = m.team_id",
+			countQuery = "select count(*) from member ",
+			nativeQuery = true)
+	Page<MemberProjection> findByNativeProjection(Pageable pageable);
 
 }
