@@ -192,15 +192,20 @@ class MemberRepositoryTest {
 		// 순수 JPA에서는 NoResultException이 터지는데 Spring Data JPA에서는 Exception이 내장되어 있어서 알아서 null로 잡아준다.
 		Member findMember = memberRepository.findMemberByUsername("AAA");
 		System.out.println("findMember = " + findMember);
+		// type check
+		System.out.println("findMember type =  " + findMember.getClass().getSimpleName());
 
 		// Java 8 이후부터 Optional이 가능하면서 처리 주도권을 프론트엔드에 넘긴다.
 		// 허나 아래와 같이 단건 조회같은 경우 Exception이 터진다.
 		Optional<Member> optionalMember = memberRepository.findOptionalByUsername("AAA");
 		System.out.println("optionalMember = " + optionalMember);
+		System.out.println("optionalMember type =  " + optionalMember.getClass().getSimpleName());
+
 
 		// 이름이 없으면 빈 컬렉션을 반환하면서 size가 0이 된다.
 		List<Member> result = memberRepository.findListByUsername("asdasfsqa");
 		System.out.println("result = " + result.size());
+		System.out.println("result type = " + result.getClass().getSimpleName());
 
 	}
 
